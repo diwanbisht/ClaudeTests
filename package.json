@@ -1,0 +1,39 @@
+{
+  "name": "ai-test-automation-framework",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-driven test automation framework: TypeScript + Playwright, Jira/Xray requirement sync, Claude-based test generation, MySQL test data, Allure reporting.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:shard": "playwright test --shard=1/4",
+    "generate:tests": "tsx src/cli/generate-tests.ts",
+    "report:allure": "allure generate allure-results --clean -o allure-report && allure open allure-report",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:cleanup": "tsx src/db/cleanup.ts",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "mysql2": "^3.11.5",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "allure-commandline": "^2.32.0",
+    "allure-playwright": "^3.0.9",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

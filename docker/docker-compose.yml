@@ -1,0 +1,92 @@
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-test_automation}
+    ports:
+      - '3306:3306'
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Four shards run in parallel, each owning one quarter of the suite.
+  # `docker compose -f docker/docker-compose.yml up --abort-on-container-exit`
+  # runs all shards concurrently and exits non-zero if any shard fails.
+  tests-shard-1:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ['--shard=1/4']
+    environment:
+      BASE_URL: ${BASE_URL:-https://the-internet.herokuapp.com}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-test_automation}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../allure-results:/app/allure-results
+      - ../test-results:/app/test-results
+
+  tests-shard-2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ['--shard=2/4']
+    environment:
+      BASE_URL: ${BASE_URL:-https://the-internet.herokuapp.com}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-test_automation}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../allure-results:/app/allure-results
+      - ../test-results:/app/test-results
+
+  tests-shard-3:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ['--shard=3/4']
+    environment:
+      BASE_URL: ${BASE_URL:-https://the-internet.herokuapp.com}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-test_automation}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../allure-results:/app/allure-results
+      - ../test-results:/app/test-results
+
+  tests-shard-4:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    command: ['--shard=4/4']
+    environment:
+      BASE_URL: ${BASE_URL:-https://the-internet.herokuapp.com}
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-test_automation}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - ../allure-results:/app/allure-results
+      - ../test-results:/app/test-results

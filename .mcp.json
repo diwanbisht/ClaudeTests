@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "atlassian": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.atlassian.com/v1/sse"],
+      "env": {}
+    },
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PAT}"
+      }
+    },
+    "mysql": {
+      "command": "npx",
+      "args": ["-y", "@benborla29/mcp-server-mysql"],
+      "env": {
+        "MYSQL_HOST": "${MYSQL_HOST}",
+        "MYSQL_PORT": "${MYSQL_PORT}",
+        "MYSQL_USER": "${MYSQL_USER}",
+        "MYSQL_PASS": "${MYSQL_PASSWORD}",
+        "MYSQL_DB": "${MYSQL_DATABASE}"
+      }
+    }
+  }
+}

@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UI-Web-App | Playwright Testing Playground</title>
+<style>
+  :root {
+    --color-primary: #2563eb;
+    --color-primary-dark: #1d4ed8;
+    --color-danger: #dc2626;
+    --color-success: #16a34a;
+    --color-secondary: #6b7280;
+    --color-bg: #f3f4f6;
+    --color-card: #ffffff;
+    --color-border: #e5e7eb;
+    --color-text: #111827;
+    --color-text-muted: #6b7280;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.5;
+  }
+
+  .hidden { display: none !important; }
+
+  .app-header {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: #fff;
+    padding: 24px 20px 0;
+  }
+
+  .app-header h1 { margin: 0 0 4px; font-size: 1.75rem; }
+  .app-subtitle { margin: 0 0 20px; opacity: 0.9; font-size: 0.95rem; }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+  }
+
+  .nav-tab-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .nav-tab-btn.active {
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-weight: 600;
+  }
+
+  .app-main { max-width: 1200px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .card-full { grid-column: 1 / -1; }
+
+  .card {
+    background: var(--color-card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+  }
+
+  .card h2 { margin: 0 0 4px; font-size: 1.15rem; }
+  .card .card-desc { margin: 0 0 16px; color: var(--color-text-muted); font-size: 0.85rem; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="date"],
+  input[type="file"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    background: #fff;
+    color: var(--color-text);
+  }
+
+  select[multiple] { min-height: 110px; }
+
+  input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 1px;
+  }
+
+  input:disabled, select:disabled, button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .checkbox-row, .radio-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .checkbox-row label, .radio-row label { font-weight: 400; margin: 0; }
+
+  .btn {
+    display: inline-block;
+    border: none;
+    border-radius: 6px;
+    padding: 9px 16px;
+    font-size: 0.88rem;
+    cursor: pointer;
+    color: #fff;
+    background: var(--color-primary);
+  }
+  .btn:hover:not(:disabled) { filter: brightness(0.93); }
+  .btn-secondary { background: var(--color-secondary); }
+  .btn-danger { background: var(--color-danger); }
+  .btn-success { background: var(--color-success); }
+  .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+
+  .output-text {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-left: 3px solid var(--color-primary);
+    border-radius: 4px;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    min-height: 18px;
+  }
+
+  .validation-message { margin-top: 8px; font-size: 0.85rem; min-height: 18px; }
+  .validation-message.error { color: var(--color-danger); }
+  .validation-message.success { color: var(--color-success); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  thead { background: #f3f4f6; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-border); }
+  tbody tr:hover { background: #f9fafb; }
+  .table-actions { display: flex; gap: 6px; }
+  .table-toolbar { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .table-toolbar input { max-width: 260px; }
+  #table-empty-message { padding: 14px; text-align: center; color: var(--color-text-muted); }
+
+  .link-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .image-row { display: flex; gap: 20px; flex-wrap: wrap; }
+  .image-box { text-align: center; }
+  .image-box img { display: block; width: 160px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid var(--color-border); background: #f9fafb; }
+  .image-box span { display: block; margin-top: 6px; font-size: 0.8rem; color: var(--color-text-muted); }
+
+  #color-change-box {
+    width: 100%;
+    height: 70px;
+    border-radius: 8px;
+    background: #9ca3af;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    margin-bottom: 12px;
+    transition: background-color 0.2s ease;
+  }
+
+  #delayed-visible-element {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #ecfdf5;
+    border: 1px solid var(--color-success);
+    border-radius: 6px;
+    color: var(--color-success);
+    font-size: 0.88rem;
+  }
+
+  iframe { border: 1px solid var(--color-border); border-radius: 6px; width: 100%; }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.55);
+    z-index: 900;
+  }
+
+  .modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    z-index: 901;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+  .modal-small { max-width: 380px; }
+  .modal-large { max-width: 680px; }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .modal-header h3 { margin: 0; font-size: 1.05rem; }
+  .modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-text-muted);
+  }
+  .modal-body { padding: 18px 20px; font-size: 0.9rem; }
+  .modal-body pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; margin: 0; }
+
+  @media (max-width: 768px) {
+    .card-grid { grid-template-columns: 1fr; }
+    .app-header h1 { font-size: 1.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <h1>UI-Web-App</h1>
+  <p class="app-subtitle">A deterministic UI testing playground for Playwright automation</p>
+  <nav class="nav-tabs" role="tablist" aria-label="Module navigation">
+    <button type="button" id="nav-tab-elements" data-testid="nav-tab-elements" class="nav-tab-btn active" data-tab="elements" role="tab" aria-selected="true">Elements</button>
+    <button type="button" id="nav-tab-forms" data-testid="nav-tab-forms" class="nav-tab-btn" data-tab="forms" role="tab" aria-selected="false">Forms</button>
+    <button type="button" id="nav-tab-alerts" data-testid="nav-tab-alerts" class="nav-tab-btn" data-tab="alerts" role="tab" aria-selected="false">Alerts, Frames &amp; Windows</button>
+  </nav>
+</header>
+
+<main class="app-main">
+
+  <!-- ===================== ELEMENTS ===================== -->
+  <section id="section-elements" class="tab-section" data-tab-panel="elements" data-testid="section-elements">
+    <div class="card-grid">
+
+      <div class="card" id="card-text-inputs" data-testid="card-text-inputs">
+        <h2>Text Inputs</h2>
+        <p class="card-desc">Typing, clearing and validation</p>
+
+        <div class="form-group">
+          <label for="input-name">Name</label>
+          <input type="text" id="input-name" data-testid="input-name" placeholder="Enter your name" />
+        </div>
+        <div class="form-group">
+          <label for="input-email">Email</label>
+          <input type="email" id="input-email" data-testid="input-email" placeholder="Enter your email" />
+        </div>
+        <div class="form-group">
+          <label for="textarea-message">Message</label>
+          <textarea id="textarea-message" data-testid="textarea-message" rows="3" placeholder="Type a message"></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" id="btn-validate-inputs" data-testid="btn-validate-inputs" class="btn">Validate</button>
+          <button type="button" id="btn-clear-inputs" data-testid="btn-clear-inputs" class="btn btn-secondary">Clear</button>
+        </div>
+
+        <p id="input-name-live-output" data-testid="input-name-live-output" class="output-text">You typed: (nothing yet)</p>
+        <p id="input-validation-message" data-testid="input-validation-message" class="validation-message"></p>
+      </div>
+
+      <div class="card" id="card-checkboxes" data-testid="card-checkboxes">
+        <h2>Checkboxes</h2>
+        <p class="card-desc">Single, multiple, default-checked and disabled states</p>
+
+        <div class="checkbox-row">
+          <input type="checkbox" id="checkbox-terms" data-testid="checkbox-terms" value="terms" />
+          <label for="checkbox-terms">Accept Terms &amp; Conditions</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="checkbox-newsletter" data-testid="checkbox-newsletter" value="newsletter" checked />
+          <label for="checkbox-newsletter">Subscribe to Newsletter (checked by default)</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="checkbox-interest-apple" data-testid="checkbox-interest-apple" value="Apple" />
+          <label for="checkbox-interest-apple">Apple</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="checkbox-interest-banana" data-testid="checkbox-interest-banana" value="Banana" />
+          <label for="checkbox-interest-banana">Banana</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="checkbox-interest-cherry" data-testid="checkbox-interest-cherry" value="Cherry" />
+          <label for="checkbox-interest-cherry">Cherry</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="checkbox-disabled" data-testid="checkbox-disabled" disabled />
+          <label for="checkbox-disabled">Disabled option</label>
+        </div>
+
+        <p id="checkbox-selected-output" data-testid="checkbox-selected-output" class="output-text"></p>
+      </div>
+
+      <div class="card" id="card-radio-buttons" data-testid="card-radio-buttons">
+        <h2>Radio Buttons</h2>
+        <p class="card-desc">Group selection with a disabled option</p>
+
+        <div class="radio-row">
+          <input type="radio" id="radio-male" data-testid="radio-male" name="gender-demo" value="Male" />
+          <label for="radio-male">Male</label>
+        </div>
+        <div class="radio-row">
+          <input type="radio" id="radio-female" data-testid="radio-female" name="gender-demo" value="Female" />
+          <label for="radio-female">Female</label>
+        </div>
+        <div class="radio-row">
+          <input type="radio" id="radio-other" data-testid="radio-other" name="gender-demo" value="Other" />
+          <label for="radio-other">Other</label>
+        </div>
+        <div class="radio-row">
+          <input type="radio" id="radio-disabled" data-testid="radio-disabled" name="gender-demo" value="Not specified" disabled />
+          <label for="radio-disabled">Prefer not to say (disabled)</label>
+        </div>
+
+        <p id="radio-selected-output" data-testid="radio-selected-output" class="output-text">Selected: (none)</p>
+      </div>
+
+      <div class="card card-full" id="card-web-table" data-testid="card-web-table">
+        <h2>Web Table</h2>
+        <p class="card-desc">Dynamic rows, search/filter and row actions</p>
+
+        <div class="table-toolbar">
+          <input type="text" id="table-search-input" data-testid="table-search-input" placeholder="Search by name..." />
+          <button type="button" id="btn-add-row" data-testid="btn-add-row" class="btn">Add Row</button>
+        </div>
+
+        <table id="data-table" data-testid="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="data-table-body" data-testid="data-table-body"></tbody>
+        </table>
+        <p id="table-empty-message" data-testid="table-empty-message" class="hidden">No matching rows found.</p>
+      </div>
+
+      <div class="card" id="card-button-interactions" data-testid="card-button-interactions">
+        <h2>Button Interactions</h2>
+        <p class="card-desc">Click, double-click, right-click, hover and keyboard modifiers</p>
+
+        <div class="btn-row">
+          <button type="button" id="btn-click" data-testid="btn-click" class="btn">Click Me</button>
+          <button type="button" id="btn-dblclick" data-testid="btn-dblclick" class="btn">Double Click Me</button>
+          <button type="button" id="btn-rightclick" data-testid="btn-rightclick" class="btn">Right Click Me</button>
+          <button type="button" id="btn-hover" data-testid="btn-hover" class="btn">Hover Over Me</button>
+          <button type="button" id="btn-keymod" data-testid="btn-keymod" class="btn">Click With Modifier</button>
+        </div>
+
+        <p id="btn-click-output" data-testid="btn-click-output" class="output-text">Button clicked 0 time(s).</p>
+        <p id="btn-dblclick-output" data-testid="btn-dblclick-output" class="output-text">Double-click the button above.</p>
+        <p id="btn-rightclick-output" data-testid="btn-rightclick-output" class="output-text">Right-click the button above.</p>
+        <p id="btn-hover-output" data-testid="btn-hover-output" class="output-text">Hover over the button to see a message.</p>
+        <p id="btn-keymod-output" data-testid="btn-keymod-output" class="output-text">Try clicking with Shift, Ctrl or Alt held down.</p>
+      </div>
+
+      <div class="card" id="card-links" data-testid="card-links">
+        <h2>Links</h2>
+        <p class="card-desc">Same tab, new tab and a broken link</p>
+
+        <div class="link-list">
+          <a id="link-same-tab" data-testid="link-same-tab" href="https://playwright.dev/" target="_self">Playwright Docs (same tab)</a>
+          <a id="link-new-tab" data-testid="link-new-tab" href="https://playwright.dev/docs/intro" target="_blank" rel="noopener noreferrer">Playwright Getting Started (new tab)</a>
+          <a id="link-broken" data-testid="link-broken" href="/this-page-does-not-exist">Broken Link (404)</a>
+        </div>
+      </div>
+
+      <div class="card" id="card-images" data-testid="card-images">
+        <h2>Images</h2>
+        <p class="card-desc">Valid and broken image rendering</p>
+
+        <div class="image-row">
+          <div class="image-box">
+            <img id="img-valid" data-testid="img-valid"
+              src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='100'%3E%3Crect width='160' height='100' fill='%232563eb'/%3E%3Ctext x='80' y='55' font-size='16' fill='white' text-anchor='middle' font-family='Arial, sans-serif'%3EValid Image%3C/text%3E%3C/svg%3E"
+              alt="Valid test image" />
+            <span>Valid image</span>
+          </div>
+          <div class="image-box">
+            <img id="img-broken" data-testid="img-broken" src="/images/non-existent-logo.png" alt="Broken test image" />
+            <span>Broken image (404)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="card-file-upload-download" data-testid="card-file-upload-download">
+        <h2>File Upload &amp; Download</h2>
+        <p class="card-desc">Upload a file and download a generated sample file</p>
+
+        <div class="form-group">
+          <label for="file-upload-input">Choose a file</label>
+          <input type="file" id="file-upload-input" data-testid="file-upload-input" />
+        </div>
+        <p id="file-upload-output" data-testid="file-upload-output" class="output-text">No file selected</p>
+
+        <button type="button" id="btn-download-file" data-testid="btn-download-file" class="btn">Download Sample File</button>
+      </div>
+
+      <div class="card" id="card-dynamic-elements" data-testid="card-dynamic-elements">
+        <h2>Dynamic Elements</h2>
+        <p class="card-desc">Delayed visibility, delayed enable and a color-changing box</p>
+
+        <button type="button" id="btn-show-delayed" data-testid="btn-show-delayed" class="btn">Show Element (2s delay)</button>
+        <p id="delayed-visible-loading" data-testid="delayed-visible-loading" class="output-text hidden">Loading...</p>
+        <p id="delayed-visible-element" data-testid="delayed-visible-element" class="hidden">I appeared after a 2 second delay!</p>
+
+        <hr style="margin:16px 0;border:none;border-top:1px solid var(--color-border);" />
+
+        <button type="button" id="btn-enabled-after-delay" data-testid="btn-enabled-after-delay" class="btn" disabled>Enabled After Delay</button>
+        <p id="delayed-enable-status" data-testid="delayed-enable-status" class="output-text">Button will be enabled in 5 second(s)...</p>
+
+        <hr style="margin:16px 0;border:none;border-top:1px solid var(--color-border);" />
+
+        <div id="color-change-box" data-testid="color-change-box">No color yet</div>
+        <button type="button" id="btn-trigger-color-change" data-testid="btn-trigger-color-change" class="btn">Change Color</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== FORMS ===================== -->
+  <section id="section-forms" class="tab-section hidden" data-tab-panel="forms" data-testid="section-forms">
+    <div class="card-grid">
+      <div class="card card-full" id="card-main-form" data-testid="card-main-form">
+        <h2>Registration Form</h2>
+        <p class="card-desc">Submit opens a modal with the submitted data</p>
+
+        <form id="main-form" data-testid="main-form" novalidate>
+          <div class="form-group">
+            <label for="form-name">Full Name</label>
+            <input type="text" id="form-name" data-testid="form-name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="form-email">Email</label>
+            <input type="email" id="form-email" data-testid="form-email" required />
+          </div>
+
+          <div class="form-group">
+            <label>Gender</label>
+            <div class="radio-row">
+              <input type="radio" id="form-gender-male" data-testid="form-gender-male" name="form-gender" value="Male" required />
+              <label for="form-gender-male">Male</label>
+            </div>
+            <div class="radio-row">
+              <input type="radio" id="form-gender-female" data-testid="form-gender-female" name="form-gender" value="Female" />
+              <label for="form-gender-female">Female</label>
+            </div>
+            <div class="radio-row">
+              <input type="radio" id="form-gender-other" data-testid="form-gender-other" name="form-gender" value="Other" />
+              <label for="form-gender-other">Other</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="form-date">Date of Birth</label>
+            <input type="date" id="form-date" data-testid="form-date" />
+          </div>
+
+          <div class="form-group">
+            <label for="form-country">Country</label>
+            <select id="form-country" data-testid="form-country" required>
+              <option value="" disabled selected>Select a country</option>
+              <option value="USA">USA</option>
+              <option value="India">India</option>
+              <option value="UK">UK</option>
+              <option value="Canada">Canada</option>
+              <option value="Australia">Australia</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="form-skills">Skills (multi-select)</label>
+            <select id="form-skills" data-testid="form-skills" multiple>
+              <option value="JavaScript">JavaScript</option>
+              <option value="Python">Python</option>
+              <option value="Java">Java</option>
+              <option value="C#">C#</option>
+              <option value="SQL">SQL</option>
+              <option value="Go">Go</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="form-file-upload">Attach a file</label>
+            <input type="file" id="form-file-upload" data-testid="form-file-upload" />
+          </div>
+
+          <div class="btn-row">
+            <button type="submit" id="form-submit-btn" data-testid="form-submit-btn" class="btn">Submit</button>
+            <button type="reset" id="form-reset-btn" data-testid="form-reset-btn" class="btn btn-secondary">Reset</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ALERTS, FRAMES & WINDOWS ===================== -->
+  <section id="section-alerts" class="tab-section hidden" data-tab-panel="alerts" data-testid="section-alerts">
+    <div class="card-grid">
+
+      <div class="card" id="card-alerts" data-testid="card-alerts">
+        <h2>Alerts</h2>
+        <p class="card-desc">Native alert, confirm and prompt dialogs</p>
+
+        <div class="btn-row">
+          <button type="button" id="btn-alert" data-testid="btn-alert" class="btn">Trigger Alert</button>
+          <button type="button" id="btn-confirm" data-testid="btn-confirm" class="btn">Trigger Confirm</button>
+          <button type="button" id="btn-prompt" data-testid="btn-prompt" class="btn">Trigger Prompt</button>
+        </div>
+
+        <p id="alert-result-output" data-testid="alert-result-output" class="output-text">No alert triggered yet.</p>
+        <p id="confirm-result-output" data-testid="confirm-result-output" class="output-text">No confirm triggered yet.</p>
+        <p id="prompt-result-output" data-testid="prompt-result-output" class="output-text">No prompt triggered yet.</p>
+      </div>
+
+      <div class="card" id="card-windows" data-testid="card-windows">
+        <h2>Windows</h2>
+        <p class="card-desc">Open a new popup window/tab</p>
+
+        <button type="button" id="btn-open-popup" data-testid="btn-open-popup" class="btn">Open Popup Window</button>
+        <p id="popup-status-output" data-testid="popup-status-output" class="output-text">No popup opened yet.</p>
+      </div>
+
+      <div class="card card-full" id="card-frames" data-testid="card-frames">
+        <h2>Frames</h2>
+        <p class="card-desc">Iframe with nested iframe content</p>
+
+        <iframe id="iframe-main" data-testid="iframe-main" title="Main Frame" height="160"></iframe>
+      </div>
+
+      <div class="card" id="card-modals" data-testid="card-modals">
+        <h2>Modal Dialogs</h2>
+        <p class="card-desc">Small and large modal windows</p>
+
+        <div class="btn-row">
+          <button type="button" id="btn-open-modal-small" data-testid="btn-open-modal-small" class="btn">Open Small Modal</button>
+          <button type="button" id="btn-open-modal-large" data-testid="btn-open-modal-large" class="btn">Open Large Modal</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<div id="modal-backdrop" class="modal-backdrop hidden" data-testid="modal-backdrop"></div>
+
+<div id="modal-small" class="modal modal-small hidden" data-testid="modal-small" role="dialog" aria-labelledby="modal-small-title">
+  <div class="modal-header">
+    <h3 id="modal-small-title">Small Modal</h3>
+    <button type="button" id="modal-small-close" data-testid="modal-small-close" class="modal-close-btn" aria-label="Close">&times;</button>
+  </div>
+  <div class="modal-body" id="modal-small-content" data-testid="modal-small-content">
+    <p>This is a small modal dialog window used for lightweight confirmations.</p>
+  </div>
+</div>
+
+<div id="modal-large" class="modal modal-large hidden" data-testid="modal-large" role="dialog" aria-labelledby="modal-large-title">
+  <div class="modal-header">
+    <h3 id="modal-large-title">Large Modal</h3>
+    <button type="button" id="modal-large-close" data-testid="modal-large-close" class="modal-close-btn" aria-label="Close">&times;</button>
+  </div>
+  <div class="modal-body" id="modal-large-content" data-testid="modal-large-content">
+    <p>This is a large modal dialog window, typically used to display more detailed content, forms or summaries.</p>
+    <p>It shares the same open/close mechanism as the small modal and the form submission modal, driven by a single reusable backdrop element.</p>
+  </div>
+</div>
+
+<div id="form-submit-modal" class="modal modal-large hidden" data-testid="form-submit-modal" role="dialog" aria-labelledby="form-submit-modal-title">
+  <div class="modal-header">
+    <h3 id="form-submit-modal-title">Form Submitted Successfully</h3>
+    <button type="button" id="form-submit-modal-close" data-testid="form-submit-modal-close" class="modal-close-btn" aria-label="Close">&times;</button>
+  </div>
+  <div class="modal-body">
+    <pre id="form-submit-modal-content" data-testid="form-submit-modal-content"></pre>
+  </div>
+</div>
+
+<script>
+  // ---------- Tab navigation ----------
+  var tabButtons = document.querySelectorAll('.nav-tab-btn');
+  var tabSections = document.querySelectorAll('.tab-section');
+
+  function showTab(tabName) {
+    tabSections.forEach(function (section) {
+      section.classList.toggle('hidden', section.dataset.tabPanel !== tabName);
+    });
+    tabButtons.forEach(function (btn) {
+      var active = btn.dataset.tab === tabName;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  }
+
+  tabButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () { showTab(btn.dataset.tab); });
+  });
+
+  // ---------- Text inputs ----------
+  var inputName = document.getElementById('input-name');
+  var inputEmail = document.getElementById('input-email');
+  var textareaMessage = document.getElementById('textarea-message');
+  var inputNameLiveOutput = document.getElementById('input-name-live-output');
+  var inputValidationMessage = document.getElementById('input-validation-message');
+
+  inputName.addEventListener('input', function () {
+    inputNameLiveOutput.textContent = inputName.value ? ('You typed: ' + inputName.value) : 'You typed: (nothing yet)';
+  });
+
+  document.getElementById('btn-clear-inputs').addEventListener('click', function () {
+    inputName.value = '';
+    inputEmail.value = '';
+    textareaMessage.value = '';
+    inputNameLiveOutput.textContent = 'You typed: (nothing yet)';
+    inputValidationMessage.textContent = '';
+    inputValidationMessage.className = 'validation-message';
+  });
+
+  document.getElementById('btn-validate-inputs').addEventListener('click', function () {
+    var errors = [];
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!inputName.value.trim()) errors.push('Name is required.');
+    if (!emailPattern.test(inputEmail.value.trim())) errors.push('A valid email is required.');
+
+    if (errors.length) {
+      inputValidationMessage.textContent = errors.join(' ');
+      inputValidationMessage.className = 'validation-message error';
+    } else {
+      inputValidationMessage.textContent = 'All fields are valid!';
+      inputValidationMessage.className = 'validation-message success';
+    }
+  });
+
+  // ---------- Checkboxes ----------
+  var checkboxTerms = document.getElementById('checkbox-terms');
+  var checkboxNewsletter = document.getElementById('checkbox-newsletter');
+  var interestIds = ['checkbox-interest-apple', 'checkbox-interest-banana', 'checkbox-interest-cherry'];
+  var checkboxSelectedOutput = document.getElementById('checkbox-selected-output');
+
+  function updateCheckboxOutput() {
+    var interests = interestIds
+      .map(function (id) { return document.getElementById(id); })
+      .filter(function (cb) { return cb.checked; })
+      .map(function (cb) { return cb.value; });
+
+    checkboxSelectedOutput.textContent =
+      'Terms accepted: ' + (checkboxTerms.checked ? 'Yes' : 'No') +
+      ' | Newsletter: ' + (checkboxNewsletter.checked ? 'Yes' : 'No') +
+      ' | Interests: ' + (interests.length ? interests.join(', ') : 'None');
+  }
+
+  [checkboxTerms, checkboxNewsletter].concat(interestIds.map(function (id) { return document.getElementById(id); }))
+    .forEach(function (cb) { cb.addEventListener('change', updateCheckboxOutput); });
+  updateCheckboxOutput();
+
+  // ---------- Radio buttons ----------
+  var genderRadios = document.querySelectorAll('input[name="gender-demo"]');
+  var radioSelectedOutput = document.getElementById('radio-selected-output');
+  genderRadios.forEach(function (radio) {
+    radio.addEventListener('change', function () {
+      radioSelectedOutput.textContent = 'Selected: ' + radio.value;
+    });
+  });
+
+  // ---------- Web table ----------
+  var tableData = [
+    { id: 1, name: 'Alice Johnson', email: 'alice.johnson@example.com', role: 'Admin' },
+    { id: 2, name: 'Bob Williams', email: 'bob.williams@example.com', role: 'Editor' },
+    { id: 3, name: 'Carol Davis', email: 'carol.davis@example.com', role: 'Viewer' },
+    { id: 4, name: 'David Brown', email: 'david.brown@example.com', role: 'Editor' },
+    { id: 5, name: 'Emma Wilson', email: 'emma.wilson@example.com', role: 'Admin' }
+  ];
+  var nextRowId = 6;
+  var editingRowId = null;
+
+  var tableSearchInput = document.getElementById('table-search-input');
+  var tableBody = document.getElementById('data-table-body');
+  var tableEmptyMessage = document.getElementById('table-empty-message');
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderTable() {
+    var term = tableSearchInput.value.trim().toLowerCase();
+    var filtered = tableData.filter(function (row) { return row.name.toLowerCase().indexOf(term) !== -1; });
+
+    tableEmptyMessage.classList.toggle('hidden', filtered.length !== 0);
+    tableBody.innerHTML = '';
+
+    filtered.forEach(function (row) {
+      var tr = document.createElement('tr');
+      tr.id = 'table-row-' + row.id;
+      tr.setAttribute('data-testid', 'table-row-' + row.id);
+
+      if (editingRowId === row.id) {
+        tr.innerHTML =
+          '<td>' + row.id + '</td>' +
+          '<td><input type="text" id="table-row-' + row.id + '-name-input" data-testid="table-row-' + row.id + '-name-input" value="' + escapeHtml(row.name) + '"></td>' +
+          '<td><input type="email" id="table-row-' + row.id + '-email-input" data-testid="table-row-' + row.id + '-email-input" value="' + escapeHtml(row.email) + '"></td>' +
+          '<td>' + escapeHtml(row.role) + '</td>' +
+          '<td class="table-actions">' +
+            '<button type="button" id="btn-save-' + row.id + '" data-testid="btn-save-' + row.id + '" class="btn btn-success btn-sm" data-action="save" data-id="' + row.id + '">Save</button>' +
+            '<button type="button" id="btn-cancel-' + row.id + '" data-testid="btn-cancel-' + row.id + '" class="btn btn-secondary btn-sm" data-action="cancel" data-id="' + row.id + '">Cancel</button>' +
+          '</td>';
+      } else {
+        tr.innerHTML =
+          '<td id="table-row-' + row.id + '-id">' + row.id + '</td>' +
+          '<td id="table-row-' + row.id + '-name">' + escapeHtml(row.name) + '</td>' +
+          '<td id="table-row-' + row.id + '-email">' + escapeHtml(row.email) + '</td>' +
+          '<td id="table-row-' + row.id + '-role">' + escapeHtml(row.role) + '</td>' +
+          '<td class="table-actions">' +
+            '<button type="button" id="btn-edit-' + row.id + '" data-testid="btn-edit-' + row.id + '" class="btn btn-secondary btn-sm" data-action="edit" data-id="' + row.id + '">Edit</button>' +
+            '<button type="button" id="btn-delete-' + row.id + '" data-testid="btn-delete-' + row.id + '" class="btn btn-danger btn-sm" data-action="delete" data-id="' + row.id + '">Delete</button>' +
+          '</td>';
+      }
+      tableBody.appendChild(tr);
+    });
+  }
+
+  tableSearchInput.addEventListener('input', renderTable);
+
+  document.getElementById('btn-add-row').addEventListener('click', function () {
+    tableData.push({ id: nextRowId, name: 'New User ' + nextRowId, email: 'newuser' + nextRowId + '@example.com', role: 'Guest' });
+    nextRowId++;
+    renderTable();
+  });
+
+  tableBody.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    var action = btn.dataset.action;
+    var id = Number(btn.dataset.id);
+
+    if (action === 'edit') {
+      editingRowId = id;
+      renderTable();
+    } else if (action === 'cancel') {
+      editingRowId = null;
+      renderTable();
+    } else if (action === 'delete') {
+      tableData = tableData.filter(function (r) { return r.id !== id; });
+      if (editingRowId === id) editingRowId = null;
+      renderTable();
+    } else if (action === 'save') {
+      var nameInput = document.getElementById('table-row-' + id + '-name-input');
+      var emailInput = document.getElementById('table-row-' + id + '-email-input');
+      var row = tableData.find(function (r) { return r.id === id; });
+      if (row) {
+        row.name = nameInput.value.trim() || row.name;
+        row.email = emailInput.value.trim() || row.email;
+      }
+      editingRowId = null;
+      renderTable();
+    }
+  });
+
+  renderTable();
+
+  // ---------- Button interactions ----------
+  var clickCount = 0;
+  document.getElementById('btn-click').addEventListener('click', function () {
+    clickCount++;
+    document.getElementById('btn-click-output').textContent = 'Button clicked ' + clickCount + ' time(s).';
+  });
+
+  document.getElementById('btn-dblclick').addEventListener('dblclick', function () {
+    document.getElementById('btn-dblclick-output').textContent = 'Button was double-clicked.';
+  });
+
+  document.getElementById('btn-rightclick').addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    document.getElementById('btn-rightclick-output').textContent = 'Button was right-clicked.';
+  });
+
+  var hoverOutput = document.getElementById('btn-hover-output');
+  document.getElementById('btn-hover').addEventListener('mouseenter', function () {
+    hoverOutput.textContent = 'Button is being hovered.';
+  });
+  document.getElementById('btn-hover').addEventListener('mouseleave', function () {
+    hoverOutput.textContent = 'Hover over the button to see a message.';
+  });
+
+  document.getElementById('btn-keymod').addEventListener('click', function (e) {
+    var mods = [];
+    if (e.shiftKey) mods.push('Shift');
+    if (e.ctrlKey) mods.push('Ctrl');
+    if (e.altKey) mods.push('Alt');
+    if (e.metaKey) mods.push('Meta');
+    document.getElementById('btn-keymod-output').textContent =
+      mods.length ? ('Clicked with modifier(s): ' + mods.join(' + ')) : 'Clicked with no modifier.';
+  });
+
+  // ---------- File upload / download ----------
+  var fileUploadInput = document.getElementById('file-upload-input');
+  var fileUploadOutput = document.getElementById('file-upload-output');
+  fileUploadInput.addEventListener('change', function () {
+    var file = fileUploadInput.files[0];
+    fileUploadOutput.textContent = file ? ('Selected file: ' + file.name + ' (' + file.size + ' bytes)') : 'No file selected';
+  });
+
+  document.getElementById('btn-download-file').addEventListener('click', function () {
+    var content = 'Hello from UI-Web-App test playground.\nThis file was generated for download testing.';
+    var blob = new Blob([content], { type: 'text/plain' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'sample-download.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  // ---------- Dynamic elements ----------
+  var btnShowDelayed = document.getElementById('btn-show-delayed');
+  var delayedVisibleElement = document.getElementById('delayed-visible-element');
+  var delayedLoading = document.getElementById('delayed-visible-loading');
+
+  btnShowDelayed.addEventListener('click', function () {
+    delayedVisibleElement.classList.add('hidden');
+    delayedLoading.classList.remove('hidden');
+    btnShowDelayed.disabled = true;
+    setTimeout(function () {
+      delayedLoading.classList.add('hidden');
+      delayedVisibleElement.classList.remove('hidden');
+      btnShowDelayed.disabled = false;
+    }, 2000);
+  });
+
+  var btnDelayedEnable = document.getElementById('btn-enabled-after-delay');
+  var delayedEnableStatus = document.getElementById('delayed-enable-status');
+  var secondsLeft = 5;
+  var countdownInterval = setInterval(function () {
+    secondsLeft--;
+    if (secondsLeft <= 0) {
+      clearInterval(countdownInterval);
+      btnDelayedEnable.disabled = false;
+      delayedEnableStatus.textContent = 'Button is now enabled!';
+    } else {
+      delayedEnableStatus.textContent = 'Button will be enabled in ' + secondsLeft + ' second(s)...';
+    }
+  }, 1000);
+
+  var colorBox = document.getElementById('color-change-box');
+  var colorSequence = ['#dc2626', '#16a34a', '#2563eb', '#9333ea', '#ea580c'];
+  var colorIndex = 0;
+  document.getElementById('btn-trigger-color-change').addEventListener('click', function () {
+    var color = colorSequence[colorIndex % colorSequence.length];
+    colorBox.style.backgroundColor = color;
+    colorBox.textContent = 'Color index: ' + (colorIndex % colorSequence.length);
+    colorIndex++;
+  });
+
+  // ---------- Form ----------
+  var mainForm = document.getElementById('main-form');
+  mainForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!mainForm.checkValidity()) {
+      mainForm.reportValidity();
+      return;
+    }
+
+    var selectedGender = mainForm.querySelector('input[name="form-gender"]:checked');
+    var selectedSkills = Array.from(document.getElementById('form-skills').selectedOptions).map(function (o) { return o.value; });
+    var uploadedFile = document.getElementById('form-file-upload').files[0];
+
+    var lines = [
+      'Name: ' + document.getElementById('form-name').value,
+      'Email: ' + document.getElementById('form-email').value,
+      'Gender: ' + (selectedGender ? selectedGender.value : '(not selected)'),
+      'Date of Birth: ' + (document.getElementById('form-date').value || '(not selected)'),
+      'Country: ' + document.getElementById('form-country').value,
+      'Skills: ' + (selectedSkills.length ? selectedSkills.join(', ') : '(none selected)'),
+      'File: ' + (uploadedFile ? uploadedFile.name : '(no file uploaded)')
+    ];
+
+    document.getElementById('form-submit-modal-content').textContent = lines.join('\n');
+    openModal('form-submit-modal');
+  });
+
+  // ---------- Alerts ----------
+  document.getElementById('btn-alert').addEventListener('click', function () {
+    window.alert('This is a native alert message.');
+    document.getElementById('alert-result-output').textContent = 'Alert dismissed.';
+  });
+
+  document.getElementById('btn-confirm').addEventListener('click', function () {
+    var confirmed = window.confirm('Do you confirm this action?');
+    document.getElementById('confirm-result-output').textContent = confirmed ? 'You clicked OK.' : 'You clicked Cancel.';
+  });
+
+  document.getElementById('btn-prompt').addEventListener('click', function () {
+    var value = window.prompt('Please enter your name:', '');
+    document.getElementById('prompt-result-output').textContent =
+      value === null ? 'Prompt was cancelled.' : ('You entered: ' + (value || '(empty)'));
+  });
+
+  // ---------- Popup window ----------
+  document.getElementById('btn-open-popup').addEventListener('click', function () {
+    var popupStatus = document.getElementById('popup-status-output');
+    var popup = window.open('', 'uiWebAppPopup', 'width=420,height=320');
+
+    if (!popup) {
+      popupStatus.textContent = 'Popup was blocked by the browser.';
+      return;
+    }
+
+    var popupHtml = '<!DOCTYPE html><html><head><title>Popup Window</title>' +
+      '<style>body{font-family:Arial,sans-serif;padding:24px;background:#f3f4f6;}' +
+      'h2{color:#111827;} button{margin-top:16px;padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;}</style>' +
+      '</head><body>' +
+      '<h2 id="popup-heading" data-testid="popup-heading">Popup Window</h2>' +
+      '<p id="popup-message" data-testid="popup-message">Hello from the popup window!</p>' +
+      '<button type="button" id="popup-close-btn" data-testid="popup-close-btn" onclick="window.close()">Close</button>' +
+      '</body></html>';
+
+    popup.document.open();
+    popup.document.write(popupHtml);
+    popup.document.close();
+    popupStatus.textContent = 'Popup window opened.';
+  });
+
+  // ---------- Iframes ----------
+  var iframeMain = document.getElementById('iframe-main');
+  var nestedHtml = '<!DOCTYPE html><html><head><title>Nested Frame</title></head>' +
+    '<body style="font-family:Arial,sans-serif;padding:12px;">' +
+    '<p id="iframe-nested-content" data-testid="iframe-nested-content">Content inside the nested iframe</p>' +
+    '</body></html>';
+  var mainFrameHtml = '<!DOCTYPE html><html><head><title>Main Frame</title></head>' +
+    '<body style="font-family:Arial,sans-serif;padding:12px;">' +
+    '<h3 id="iframe-content" data-testid="iframe-content">Content inside the main iframe</h3>' +
+    '<iframe id="iframe-nested" data-testid="iframe-nested" title="Nested Frame" style="width:100%;height:90px;border:1px solid #d1d5db;" srcdoc="' + nestedHtml.replace(/"/g, '&quot;') + '"></iframe>' +
+    '</body></html>';
+  iframeMain.srcdoc = mainFrameHtml;
+
+  // ---------- Modals ----------
+  var modalBackdrop = document.getElementById('modal-backdrop');
+  var currentOpenModalId = null;
+
+  function openModal(modalId) {
+    currentOpenModalId = modalId;
+    modalBackdrop.classList.remove('hidden');
+    document.getElementById(modalId).classList.remove('hidden');
+  }
+
+  function closeModal(modalId) {
+    document.getElementById(modalId).classList.add('hidden');
+    modalBackdrop.classList.add('hidden');
+    currentOpenModalId = null;
+  }
+
+  modalBackdrop.addEventListener('click', function () {
+    if (currentOpenModalId) closeModal(currentOpenModalId);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && currentOpenModalId) closeModal(currentOpenModalId);
+  });
+
+  document.getElementById('btn-open-modal-small').addEventListener('click', function () { openModal('modal-small'); });
+  document.getElementById('modal-small-close').addEventListener('click', function () { closeModal('modal-small'); });
+  document.getElementById('btn-open-modal-large').addEventListener('click', function () { openModal('modal-large'); });
+  document.getElementById('modal-large-close').addEventListener('click', function () { closeModal('modal-large'); });
+  document.getElementById('form-submit-modal-close').addEventListener('click', function () { closeModal('form-submit-modal'); });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+function required(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
+function optional(name: string, fallback: string): string {
+  return process.env[name] ?? fallback;
+}
+
+export const config = {
+  baseUrl: optional('BASE_URL', 'https://the-internet.herokuapp.com'),
+
+  jira: {
+    baseUrl: () => required('JIRA_BASE_URL'),
+    email: () => required('JIRA_EMAIL'),
+    apiToken: () => required('JIRA_API_TOKEN'),
+  },
+
+  xray: {
+    clientId: () => required('XRAY_CLIENT_ID'),
+    clientSecret: () => required('XRAY_CLIENT_SECRET'),
+  },
+
+  claude: {
+    apiKey: () => required('ANTHROPIC_API_KEY'),
+    model: optional('ANTHROPIC_MODEL', 'claude-sonnet-5'),
+  },
+
+  mysql: {
+    host: optional('MYSQL_HOST', 'localhost'),
+    port: Number(optional('MYSQL_PORT', '3306')),
+    user: optional('MYSQL_USER', 'root'),
+    password: optional('MYSQL_PASSWORD', ''),
+    database: optional('MYSQL_DATABASE', 'test_automation'),
+  },
+
+  logLevel: optional('LOG_LEVEL', 'info'),
+};
