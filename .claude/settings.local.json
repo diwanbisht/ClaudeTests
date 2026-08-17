@@ -5,10 +5,11 @@
     ]
   },
   "disabledMcpjsonServers": [
-    "atlassian",
-    "mysql"
+    "azure"
   ],
   "enabledMcpjsonServers": [
-    "github"
+    "github",
+    "mysql",
+    "atlassian"
   ]
 }

@@ -367,6 +367,7 @@
           <tbody id="data-table-body" data-testid="data-table-body"></tbody>
         </table>
         <p id="table-empty-message" data-testid="table-empty-message" class="hidden">No matching rows found.</p>
+        <p id="table-error-message" data-testid="table-error-message" class="hidden validation-message error"></p>
       </div>
 
       <div class="card" id="card-button-interactions" data-testid="card-button-interactions">
@@ -698,19 +699,38 @@
   });
 
   // ---------- Web table ----------
-  var tableData = [
-    { id: 1, name: 'Alice Johnson', email: 'alice.johnson@example.com', role: 'Admin' },
-    { id: 2, name: 'Bob Williams', email: 'bob.williams@example.com', role: 'Editor' },
-    { id: 3, name: 'Carol Davis', email: 'carol.davis@example.com', role: 'Viewer' },
-    { id: 4, name: 'David Brown', email: 'david.brown@example.com', role: 'Editor' },
-    { id: 5, name: 'Emma Wilson', email: 'emma.wilson@example.com', role: 'Admin' }
-  ];
-  var nextRowId = 6;
+  var tableData = [];
   var editingRowId = null;
 
   var tableSearchInput = document.getElementById('table-search-input');
   var tableBody = document.getElementById('data-table-body');
   var tableEmptyMessage = document.getElementById('table-empty-message');
+  var tableErrorMessage = document.getElementById('table-error-message');
+
+  function showTableError(message) {
+    tableErrorMessage.textContent = message;
+    tableErrorMessage.classList.remove('hidden');
+  }
+
+  function clearTableError() {
+    tableErrorMessage.classList.add('hidden');
+  }
+
+  function loadTableData() {
+    clearTableError();
+    return fetch('/api/users')
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (rows) {
+        tableData = rows;
+        renderTable();
+      })
+      .catch(function () {
+        showTableError('Failed to load users from the server.');
+      });
+  }
 
   function escapeHtml(value) {
     return String(value)
@@ -761,9 +781,19 @@
   tableSearchInput.addEventListener('input', renderTable);
 
   document.getElementById('btn-add-row').addEventListener('click', function () {
-    tableData.push({ id: nextRowId, name: 'New User ' + nextRowId, email: 'newuser' + nextRowId + '@example.com', role: 'Guest' });
-    nextRowId++;
-    renderTable();
+    clearTableError();
+    fetch('/api/users', { method: 'POST' })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (row) {
+        tableData.push(row);
+        renderTable();
+      })
+      .catch(function () {
+        showTableError('Failed to add user.');
+      });
   });
 
   tableBody.addEventListener('click', function (e) {
@@ -779,23 +809,50 @@
       editingRowId = null;
       renderTable();
     } else if (action === 'delete') {
-      tableData = tableData.filter(function (r) { return r.id !== id; });
-      if (editingRowId === id) editingRowId = null;
-      renderTable();
+      clearTableError();
+      fetch('/api/users/' + id, { method: 'DELETE' })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function () {
+          tableData = tableData.filter(function (r) { return r.id !== id; });
+          if (editingRowId === id) editingRowId = null;
+          renderTable();
+        })
+        .catch(function () {
+          showTableError('Failed to delete user ' + id + '.');
+        });
     } else if (action === 'save') {
       var nameInput = document.getElementById('table-row-' + id + '-name-input');
       var emailInput = document.getElementById('table-row-' + id + '-email-input');
-      var row = tableData.find(function (r) { return r.id === id; });
-      if (row) {
-        row.name = nameInput.value.trim() || row.name;
-        row.email = emailInput.value.trim() || row.email;
-      }
-      editingRowId = null;
-      renderTable();
+      var newName = nameInput.value.trim();
+      var newEmail = emailInput.value.trim();
+      clearTableError();
+      fetch('/api/users/' + id, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newName, email: newEmail })
+      })
+        .then(function (res) {
+          if (!res.ok) {
+            return res.json().then(function (body) { throw new Error(body.error || ('HTTP ' + res.status)); });
+          }
+          return res.json();
+        })
+        .then(function (updatedRow) {
+          var idx = tableData.findIndex(function (r) { return r.id === id; });
+          if (idx !== -1) tableData[idx] = updatedRow;
+          editingRowId = null;
+          renderTable();
+        })
+        .catch(function (err) {
+          showTableError('Failed to save user ' + id + ': ' + err.message);
+        });
     }
   });
 
-  renderTable();
+  loadTableData();
 
   // ---------- Button interactions ----------
   var clickCount = 0;

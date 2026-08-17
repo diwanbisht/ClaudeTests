@@ -5,5 +5,9 @@
   "description": "Static UI testing playground (Elements, Forms, Alerts/Frames/Windows) for Playwright automation.",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "mysql2": "^3.11.5"
   }
 }

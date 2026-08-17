@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/test-fixtures';
+import { test, expect } from '../../fixtures/test-fixtures';
 
 test.describe('login', () => {
   test('valid credentials show a success message', async ({ loginPage }) => {

@@ -16,6 +16,7 @@ function optional(name: string, fallback: string): string {
 
 export const config = {
   baseUrl: optional('BASE_URL', 'https://the-internet.herokuapp.com'),
+  uiWebAppUrl: optional('UI_WEB_APP_URL', 'http://localhost:5500'),
 
   jira: {
     baseUrl: () => required('JIRA_BASE_URL'),

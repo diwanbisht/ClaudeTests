@@ -1,11 +1,13 @@
 import { test as base } from '@playwright/test';
 import { Pool } from 'mysql2/promise';
 import { LoginPage } from '../pages/LoginPage';
+import { WebTablePage } from '../pages/WebTablePage';
 import { getPool } from '../db/connection';
 import { logger } from '../utils/logger';
 
 type Fixtures = {
   loginPage: LoginPage;
+  webTablePage: WebTablePage;
   db: Pool;
 };
 
@@ -19,6 +21,9 @@ type Fixtures = {
 export const test = base.extend<Fixtures>({
   loginPage: async ({ page }, use) => {
     await use(new LoginPage(page));
+  },
+  webTablePage: async ({ page }, use) => {
+    await use(new WebTablePage(page));
   },
   db: async ({}, use) => {
     await use(getPool());
