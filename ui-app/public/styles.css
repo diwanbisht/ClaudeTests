@@ -1,0 +1,56 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 2rem;
+  color: #1a1a1a;
+}
+
+.card {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 480px;
+  margin-bottom: 2rem;
+}
+
+.card label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.card input,
+.card textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.4rem;
+  box-sizing: border-box;
+}
+
+.actions {
+  margin: 0.75rem 0;
+}
+
+.actions button {
+  margin-right: 0.5rem;
+}
+
+.validation-message {
+  font-weight: 600;
+}
+
+.error-message {
+  color: #b00020;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table th,
+table td {
+  border: 1px solid #d0d0d0;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}

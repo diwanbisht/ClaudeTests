@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>UI-Web-App</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="elements">
+      <h1>Elements</h1>
+
+      <section class="card" aria-labelledby="text-inputs-heading">
+        <h2 id="text-inputs-heading">Text Inputs</h2>
+        <label>
+          Name
+          <input type="text" data-testid="input-name" />
+        </label>
+        <label>
+          Email
+          <input type="email" data-testid="input-email" />
+        </label>
+        <label>
+          Message
+          <textarea data-testid="textarea-message"></textarea>
+        </label>
+        <p class="live-output" data-testid="input-name-live-output">You typed: (nothing yet)</p>
+        <div class="actions">
+          <button type="button" data-testid="btn-validate-inputs">Validate</button>
+          <button type="button" data-testid="btn-clear-inputs">Clear</button>
+        </div>
+        <p class="validation-message" data-testid="input-validation-message"></p>
+      </section>
+
+      <section class="card" aria-labelledby="web-table-heading">
+        <h2 id="web-table-heading">Web Table</h2>
+        <p class="error-message" data-testid="table-error-message" hidden>
+          Failed to load users.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody data-testid="data-table-body"></tbody>
+        </table>
+        <div class="actions">
+          <button type="button" data-testid="btn-add-row">Add Row</button>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

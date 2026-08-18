@@ -58,7 +58,6 @@ jobs:
           MYSQL_USER: root
           MYSQL_PASSWORD: root
           MYSQL_DATABASE: test_automation
-          BASE_URL: ${{ vars.BASE_URL }}
 
       - name: Upload Allure results (shard ${{ matrix.shard }})
         if: always()
