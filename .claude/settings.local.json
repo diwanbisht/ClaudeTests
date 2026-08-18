@@ -1,15 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(claude mcp *)"
+      "Bash(claude mcp *)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type"
     ]
   },
-  "disabledMcpjsonServers": [
-    "azure"
-  ],
   "enabledMcpjsonServers": [
     "github",
     "mysql",
     "atlassian"
+  ],
+  "disabledMcpjsonServers": [
+    "azure"
   ]
 }

@@ -5,8 +5,8 @@
   "description": "AI-driven test automation framework: TypeScript + Playwright, Jira/Xray requirement sync, Claude-based test generation, MySQL test data, Allure reporting.",
   "type": "commonjs",
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
+    "test": "node scripts/test-and-report.js",
+    "test:headed": "node scripts/test-and-report.js --headed",
     "test:debug": "playwright test --debug",
     "test:shard": "playwright test --shard=1/4",
     "generate:tests": "tsx src/cli/generate-tests.ts",
