@@ -123,9 +123,14 @@ suite needs seeded data; call them explicitly in CI/Docker before the run.
   gives a Jira issue key and asks for test coverage.
 - **Subagents**: `.claude/agents/test-generator.md` (writes/repairs specs in
   `src/tests/generated/`, always reusing existing Page Object methods first)
-  and `.claude/agents/pom-builder.md` (creates/extends `src/pages/*.ts` when
-  no existing method covers a needed UI step). `test-generator` should hand
-  off to `pom-builder` rather than inventing raw locators inline.
+  `.claude/agents/pom-builder.md` (creates/extends `src/pages/*.ts` when
+  no existing method covers a needed UI step), and
+  `.claude/agents/root-cause-analyzer.md` (reads `allure-results/`,
+  `test-results/*/error-context.md`, and failure screenshots after a run and
+  writes `test-results/failure-summary.md`; invoke it whenever tests fail,
+  before handing off to `pom-builder`/`test-generator` for the actual fix).
+  `test-generator` should hand off to `pom-builder` rather than inventing
+  raw locators inline.
 - **Hook**: `.claude/settings.json` runs a `PostToolUse` hook
   (`.claude/hooks/lint-generated.js`) after any Write/Edit that touches a
   file under `src/tests/generated/`, auto-running `eslint --fix` and

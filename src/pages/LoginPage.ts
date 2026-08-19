@@ -1,23 +1,14 @@
-import { Locator, Page } from '@playwright/test';
+import { Page , expect} from '@playwright/test';
 import { BasePage } from './BasePage';
 
-/**
- * Example Page Object targeting the public "the-internet.herokuapp.com/login"
- * practice site. Replace with real application locators; keep the same
- * shape (goto/act/assert-ready getters) so generated tests stay consistent.
- */
 export class LoginPage extends BasePage {
-  private readonly usernameInput: Locator;
-  private readonly passwordInput: Locator;
-  private readonly submitButton: Locator;
-  private readonly flashMessage: Locator;
+
+  protected getPOMFilePath(): string {
+    return 'src/pages/LoginPage.ts';
+  }
 
   constructor(page: Page) {
     super(page);
-    this.usernameInput = page.locator('#username');
-    this.passwordInput = page.locator('#password');
-    this.submitButton = page.locator('button[type="submit"]');
-    this.flashMessage = page.locator('#flash');
   }
 
   async open(): Promise<void> {
@@ -25,12 +16,33 @@ export class LoginPage extends BasePage {
   }
 
   async login(username: string, password: string): Promise<void> {
-    await this.usernameInput.fill(username);
-    await this.passwordInput.fill(password);
-    await this.submitButton.click();
+
+    const usernameInput = await this.getLocator( 'usernameInput','#usernameTest');
+    const passwordInput = await this.getLocator('passwordInput','#passwordiudfdfuoiuodf');
+    const submitButton = await this.getLocator('submitButton','button[type="submit"]');
+    await usernameInput.fill(username);
+    await passwordInput.fill(password);
+    await submitButton.click();
   }
 
   async getFlashMessage(): Promise<string> {
-    return (await this.flashMessage.textContent())?.trim() ?? '';
+    const flashMessage = await this.getLocator('flashMessage','#flash');
+    return (await flashMessage.textContent())?.trim() ?? '';
   }
+  
+  async enterUsername(username: string, email: string): Promise<void> {
+  await this.page.getByTestId('input-name').click();
+  await this.page.getByTestId('input-name').fill(username);
+  await this.page.getByTestId('input-name').press('Tab');
+  await this.page.getByTestId('input-email').fill(email);
+  await this.page.getByTestId('input-email').press('Tab');
+  await this.page.getByTestId('textarea-message').fill('Testing');
+  await this.page.getByTestId('btn-validate-inputs').click();
+  await this.page.getByTestId('input-validation-message').click();
+  await expect(this.page.getByTestId('input-validation-message')).toBeVisible();
+
 }
+
+}
+
+

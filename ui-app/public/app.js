@@ -29,6 +29,38 @@ clearButton.addEventListener('click', () => {
   validationMessage.textContent = '';
 });
 
+// Checkboxes & Radio Buttons
+const termsCheckbox = document.querySelector('[data-testid="checkbox-terms"]');
+const newsletterCheckbox = document.querySelector('[data-testid="checkbox-newsletter"]');
+const interestCheckboxes = Array.from(
+  document.querySelectorAll('[data-testid^="checkbox-interest-"]'),
+);
+const checkboxOutput = document.querySelector('[data-testid="checkbox-selected-output"]');
+
+function updateCheckboxOutput() {
+  const interests = interestCheckboxes
+    .filter((checkbox) => checkbox.checked)
+    .map((checkbox) => checkbox.dataset.testid.replace('checkbox-interest-', ''))
+    .map((name) => name.charAt(0).toUpperCase() + name.slice(1));
+  checkboxOutput.textContent = `Terms accepted: ${termsCheckbox.checked ? 'Yes' : 'No'} | Newsletter: ${newsletterCheckbox.checked ? 'Yes' : 'No'} | Interests: ${interests.join(', ')}`;
+}
+
+[termsCheckbox, newsletterCheckbox, ...interestCheckboxes].forEach((checkbox) => {
+  checkbox.addEventListener('change', updateCheckboxOutput);
+});
+updateCheckboxOutput();
+
+const radioButtons = Array.from(document.querySelectorAll('[data-testid^="radio-"]'));
+const radioOutput = document.querySelector('[data-testid="radio-selected-output"]');
+const radioLabels = { male: 'Male', female: 'Female', other: 'Other' };
+
+radioButtons.forEach((radio) => {
+  radio.addEventListener('change', () => {
+    const option = radio.dataset.testid.replace('radio-', '');
+    radioOutput.textContent = `Selected: ${radioLabels[option] ?? option}`;
+  });
+});
+
 // Web Table
 const tableBody = document.querySelector('[data-testid="data-table-body"]');
 const addRowButton = document.querySelector('[data-testid="btn-add-row"]');

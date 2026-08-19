@@ -27,6 +27,25 @@ body {
   box-sizing: border-box;
 }
 
+.card input[type='checkbox'],
+.card input[type='radio'] {
+  display: inline-block;
+  width: auto;
+  margin: 0 0.4rem 0 0;
+  padding: 0;
+}
+
+.card fieldset {
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.live-output {
+  font-size: 0.9rem;
+}
+
 .actions {
   margin: 0.75rem 0;
 }

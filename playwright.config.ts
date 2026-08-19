@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: true,
 
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
+  retries: Number(process.env.TEST_RETRIES ?? (process.env.CI ? 2 : 1)),
   workers: process.env.CI ? 2 : '50%',
 
   timeout: 30000,
@@ -33,10 +33,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    
   },
 
   webServer: {
-    command: 'node ui-app/server.js',
+    command: 'node UI-Web-App/server.js',
     url: 'http://localhost:5500',
     reuseExistingServer: !process.env.CI,
     timeout: 30000,
