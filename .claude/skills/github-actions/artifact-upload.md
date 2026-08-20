@@ -10,80 +10,79 @@ Standardize artifact uploads in CI pipelines for:
 - Debugging failures
 - Sharing reports
 - Traceability across runs
-- AI-assisted analysis (future use)
+- Feeding the `root-cause-analyzer` subagent when triage happens outside CI
 
 ---
 
-## 📂 What to Upload
+## 📂 What to Upload, and When
 
-### 1. Playwright Report
-- Folder: `playwright-report/`
-- Contains HTML execution report
-
----
-
-### 2. Allure Report
-- Folder: `allure-report/`
-- Generated after test execution
-- Rich reporting with steps, attachments, logs
-
----
-
-### 3. Allure Results (RAW DATA)
+### 1. Allure Results (raw, per-shard)
 - Folder: `allure-results/`
-- Required for:
-  - Regeneration
-  - Historical trend analysis
-  - AI analysis
+- Upload `if: always()` from **each shard job**, with a shard-unique artifact
+  name (e.g. `allure-results-${{ matrix.shard }}`) — a shared name across
+  shards causes later shards to overwrite earlier ones instead of
+  accumulating.
 
----
+### 2. Allure Report (merged, one per run)
+- Folder: `allure-report/`
+- Generated once, in the merge/report job, from all shards' downloaded
+  `allure-results-*` artifacts combined — never generate this per-shard,
+  since a single shard only has a partial run.
 
-### 4. Test Results (Playwright)
+### 3. Playwright HTML report
+- Folder: `playwright-report/`
+- Useful as a lighter-weight fallback if Allure generation itself fails.
+
+### 4. Test Results (screenshots/videos/traces)
 - Folder: `test-results/`
-- Contains:
-  - screenshots
-  - videos
-  - traces
+- Only populated for failed/retried tests, per
+  `playwright.config.ts`'s `retain-on-failure`/`only-on-failure` settings —
+  expect this to be small or empty on a fully green run.
 
----
-
-### 5. Logs (Optional but Recommended)
+### 5. Logs
 - Folder: `logs/`
-- Custom framework logs
+- `src/utils/logger.ts`'s winston output (`test-run.log`) — attach this when
+  a failure needs step-level timing, not just the final error.
 
 ---
 
-## ⚙️ GitHub Actions Implementation
+## ⚙️ Implementation
 
-Use `actions/upload-artifact@v4`
-
-### ✅ Example
+Use `actions/upload-artifact@v4` (upload) and `actions/download-artifact@v4`
+(merge job):
 
 ```yaml
-- name: Upload Playwright Report
+- name: Upload Allure results (this shard)
+  if: always()
   uses: actions/upload-artifact@v4
   with:
-    name: playwright-report
-    path: playwright-report/
+    name: allure-results-${{ matrix.shard }}
+    path: allure-results/
     retention-days: 7
+```
 
-- name: Upload Allure Report
-  uses: actions/upload-artifact@v4
+```yaml
+# in the merge/report job
+- name: Download all shard results
+  uses: actions/download-artifact@v4
+  with:
+    pattern: allure-results-*
+    path: allure-results
+    merge-multiple: true
+- run: npx allure generate allure-results --clean -o allure-report
+- uses: actions/upload-artifact@v4
   with:
     name: allure-report
     path: allure-report/
     retention-days: 7
+```
 
-- name: Upload Allure Results
-  uses: actions/upload-artifact@v4
-  with:
-    name: allure-results
-    path: allure-results/
-    retention-days: 7
-
-- name: Upload Test Results (videos/screenshots)
-  uses: actions/upload-artifact@v4
-  with:
-    name: test-results
-    path: test-results/
-    retention-days: 7
+## Rules
+- Always upload with `if: always()`, not the job's default `on success` —
+  the point of these artifacts is diagnosing failures, so they must survive
+  a failed step.
+- Give per-shard artifacts unique names; only the final merged report should
+  use a single shared name.
+- Set a `retention-days` that matches how long you actually triage failures
+  (7 is a reasonable default) — unbounded retention just accumulates storage
+  cost on a repo with sharded, frequent CI runs.

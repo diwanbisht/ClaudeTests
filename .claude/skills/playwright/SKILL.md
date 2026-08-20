@@ -1,5 +1,5 @@
 ---
-name: playwright-core
+name: playwright
 description: Use this skill for generating Playwright TypeScript tests, Page Object Models, selectors, and assertions following best practices.
 ---
 

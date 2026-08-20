@@ -34,6 +34,17 @@ export const config = {
     model: optional('ANTHROPIC_MODEL', 'claude-sonnet-5'),
   },
 
+  chroma: {
+    host: optional('CHROMA_HOST', 'localhost'),
+    port: Number(optional('CHROMA_PORT', '8000')),
+  },
+
+  ollama: {
+    url: optional('OLLAMA_URL', 'http://localhost:11434'),
+    embedModel: optional('OLLAMA_EMBED_MODEL', 'nomic-embed-text'),
+    generateModel: optional('OLLAMA_GENERATE_MODEL', 'llama3'),
+  },
+
   mysql: {
     host: optional('MYSQL_HOST', 'localhost'),
     port: Number(optional('MYSQL_PORT', '3306')),

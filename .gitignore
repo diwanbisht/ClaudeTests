@@ -26,3 +26,6 @@ Thumbs.db
 
 # Playwright MCP debug output
 .playwright-mcp/
+
+# Local-only RAG experimentation (not part of the CI pipeline)
+local-rag/

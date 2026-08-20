@@ -26,6 +26,7 @@ export default defineConfig({
       detail: true,
     }],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
+    ['./src/utils/allureAutoOpenReporter.ts'],
   ],
 
   use: {
