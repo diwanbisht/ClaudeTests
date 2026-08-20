@@ -29,3 +29,6 @@ Thumbs.db
 
 # Local-only RAG experimentation (not part of the CI pipeline)
 local-rag/
+
+# Local-only architecture notes
+testArchitect.md
