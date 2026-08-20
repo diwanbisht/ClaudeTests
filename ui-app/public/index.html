@@ -31,6 +31,51 @@
         <p class="validation-message" data-testid="input-validation-message"></p>
       </section>
 
+      <section class="card" aria-labelledby="checkboxes-heading">
+        <h2 id="checkboxes-heading">Checkboxes &amp; Radio Buttons</h2>
+        <label>
+          <input type="checkbox" data-testid="checkbox-terms" />
+          I agree to the Terms and Conditions
+        </label>
+        <label>
+          <input type="checkbox" data-testid="checkbox-newsletter" checked />
+          Subscribe to newsletter
+        </label>
+        <fieldset>
+          <legend>Interests</legend>
+          <label>
+            <input type="checkbox" data-testid="checkbox-interest-apple" />
+            Apple
+          </label>
+          <label>
+            <input type="checkbox" data-testid="checkbox-interest-banana" />
+            Banana
+          </label>
+          <label>
+            <input type="checkbox" data-testid="checkbox-interest-cherry" />
+            Cherry
+          </label>
+        </fieldset>
+        <p class="live-output" data-testid="checkbox-selected-output"></p>
+
+        <fieldset>
+          <legend>Gender</legend>
+          <label>
+            <input type="radio" name="gender" data-testid="radio-male" />
+            Male
+          </label>
+          <label>
+            <input type="radio" name="gender" data-testid="radio-female" />
+            Female
+          </label>
+          <label>
+            <input type="radio" name="gender" data-testid="radio-other" />
+            Other
+          </label>
+        </fieldset>
+        <p class="live-output" data-testid="radio-selected-output"></p>
+      </section>
+
       <section class="card" aria-labelledby="web-table-heading">
         <h2 id="web-table-heading">Web Table</h2>
         <p class="error-message" data-testid="table-error-message" hidden>

@@ -1,4 +1,4 @@
-import { expect, Locator, Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 import { config } from '../utils/config';
 
@@ -15,15 +15,12 @@ export interface WebTableRow {
  * `app_users` MySQL table via /api/users, so ids are server-assigned.
  */
 export class WebTablePage extends BasePage {
-  private readonly addRowButton: Locator;
-  private readonly tableBody: Locator;
-  private readonly errorMessage: Locator;
+  protected getPOMFilePath(): string {
+    return 'src/pages/WebTablePage.ts';
+  }
 
   constructor(page: Page) {
     super(page);
-    this.addRowButton = page.getByTestId('btn-add-row');
-    this.tableBody = page.getByTestId('data-table-body');
-    this.errorMessage = page.getByTestId('table-error-message');
   }
 
   async open(): Promise<void> {
@@ -37,22 +34,27 @@ export class WebTablePage extends BasePage {
   }
 
   async getRowIds(): Promise<number[]> {
-    const testIds = await this.tableBody.locator('tr').evaluateAll((rows) =>
-      rows.map((row) => row.getAttribute('data-testid') ?? ''),
-    );
+    const tableBody = await this.getLocator('tableBody', '[data-testid="data-table-body"]');
+    const testIds = await tableBody
+      .locator('tr')
+      .evaluateAll((rows) => rows.map((row) => row.getAttribute('data-testid') ?? ''));
     return testIds
       .filter((testId) => testId.startsWith('table-row-'))
       .map((testId) => Number(testId.replace('table-row-', '')));
   }
 
   async getRowCount(): Promise<number> {
-    return this.tableBody.locator('tr').count();
+    const tableBody = await this.getLocator('tableBody', '[data-testid="data-table-body"]');
+    return tableBody.locator('tr').count();
   }
 
   async getRow(id: number): Promise<WebTableRow> {
-    const name = await this.page.locator(`#table-row-${id}-name`).textContent();
-    const email = await this.page.locator(`#table-row-${id}-email`).textContent();
-    const role = await this.page.locator(`#table-row-${id}-role`).textContent();
+    const nameCell = await this.getLocator(`nameCell-${id}`, `#table-row-${id}-name`);
+    const emailCell = await this.getLocator(`emailCell-${id}`, `#table-row-${id}-email`);
+    const roleCell = await this.getLocator(`roleCell-${id}`, `#table-row-${id}-role`);
+    const name = await nameCell.textContent();
+    const email = await emailCell.textContent();
+    const role = await roleCell.textContent();
     return {
       id,
       name: name?.trim() ?? '',
@@ -64,7 +66,8 @@ export class WebTablePage extends BasePage {
   /** Clicks "Add Row" and returns the server-assigned id of the newly created row. */
   async addRow(): Promise<number> {
     const before = await this.getRowIds();
-    await this.addRowButton.click();
+    const addRowButton = await this.getLocator('addRowButton', '[data-testid="btn-add-row"]');
+    await addRowButton.click();
     await expect.poll(() => this.getRowCount()).toBeGreaterThan(before.length);
     const after = await this.getRowIds();
     const newId = after.find((id) => !before.includes(id));
@@ -76,18 +79,39 @@ export class WebTablePage extends BasePage {
 
   /** Edits a row's Name/Email inline and saves. Role is read-only in the UI, so it's never touched. */
   async editRow(id: number, updates: { name?: string; email?: string }): Promise<void> {
-    await this.page.getByTestId(`btn-edit-${id}`).click();
+    const editButton = await this.getLocator(`editButton-${id}`, `[data-testid="btn-edit-${id}"]`);
+    await editButton.click();
+
     if (updates.name !== undefined) {
-      await this.page.getByTestId(`table-row-${id}-name-input`).fill(updates.name);
+      const nameInput = await this.getLocator(
+        `nameInput-${id}`,
+        `[data-testid="table-row-${id}-name-input"]`,
+      );
+      await nameInput.fill(updates.name);
     }
     if (updates.email !== undefined) {
-      await this.page.getByTestId(`table-row-${id}-email-input`).fill(updates.email);
+      const emailInput = await this.getLocator(
+        `emailInput-${id}`,
+        `[data-testid="table-row-${id}-email-input"]`,
+      );
+      await emailInput.fill(updates.email);
     }
-    await this.page.getByTestId(`btn-save-${id}`).click();
-    await this.page.getByTestId(`btn-edit-${id}`).waitFor();
+
+    const saveButton = await this.getLocator(`saveButton-${id}`, `[data-testid="btn-save-${id}"]`);
+    await saveButton.click();
+
+    const editButtonAfterSave = await this.getLocator(
+      `editButton-${id}`,
+      `[data-testid="btn-edit-${id}"]`,
+    );
+    await editButtonAfterSave.waitFor();
   }
 
   async isErrorVisible(): Promise<boolean> {
-    return this.errorMessage.isVisible();
+    const errorMessage = await this.getLocator(
+      'errorMessage',
+      '[data-testid="table-error-message"]',
+    );
+    return errorMessage.isVisible();
   }
 }

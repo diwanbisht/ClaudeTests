@@ -20,17 +20,21 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",
-    "axios": "^1.7.9",
+    "@langchain/openai": "^1.5.9",
+    "axios": "^1.19.0",
+    "chromadb": "^3.5.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "langchain": "^1.5.10",
     "mysql2": "^3.11.5",
+    "pdf-parse": "^2.4.5",
     "winston": "^3.17.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
-    "allure-commandline": "^2.32.0",
+    "allure-commandline": "^2.43.0",
     "allure-playwright": "^3.0.9",
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",

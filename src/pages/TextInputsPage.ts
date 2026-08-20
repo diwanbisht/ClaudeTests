@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { BasePage } from './BasePage';
 import { config } from '../utils/config';
 
@@ -8,23 +8,12 @@ import { config } from '../utils/config';
  * Validate/Clear buttons.
  */
 export class TextInputsPage extends BasePage {
-  private readonly nameInput: Locator;
-  private readonly emailInput: Locator;
-  private readonly messageInput: Locator;
-  private readonly validateButton: Locator;
-  private readonly clearButton: Locator;
-  private readonly liveTypedText: Locator;
-  private readonly validationMessage: Locator;
+  protected getPOMFilePath(): string {
+    return 'src/pages/TextInputsPage.ts';
+  }
 
   constructor(page: Page) {
     super(page);
-    this.nameInput = page.getByTestId('input-name');
-    this.emailInput = page.getByTestId('input-email');
-    this.messageInput = page.getByTestId('textarea-message');
-    this.validateButton = page.getByTestId('btn-validate-inputs');
-    this.clearButton = page.getByTestId('btn-clear-inputs');
-    this.liveTypedText = page.getByTestId('input-name-live-output');
-    this.validationMessage = page.getByTestId('input-validation-message');
   }
 
   async open(): Promise<void> {
@@ -33,30 +22,46 @@ export class TextInputsPage extends BasePage {
   }
 
   async fillName(name: string): Promise<void> {
-    await this.nameInput.fill(name);
+    const nameInput = await this.getLocator('nameInput', '[data-testid="input-name"]');
+    await nameInput.fill(name);
   }
 
   async fillEmail(email: string): Promise<void> {
-    await this.emailInput.fill(email);
+    const emailInput = await this.getLocator('emailInput', '[data-testid="input-email"]');
+    await emailInput.fill(email);
   }
 
   async fillMessage(message: string): Promise<void> {
-    await this.messageInput.fill(message);
+    const messageInput = await this.getLocator('messageInput', '[data-testid="textarea-message"]');
+    await messageInput.fill(message);
   }
 
   async clickValidate(): Promise<void> {
-    await this.validateButton.click();
+    const validateButton = await this.getLocator(
+      'validateButton',
+      '[data-testid="btn-validate-inputs"]',
+    );
+    await validateButton.click();
   }
 
   async clickClear(): Promise<void> {
-    await this.clearButton.click();
+    const clearButton = await this.getLocator('clearButton', '[data-testid="btn-clear-inputs"]');
+    await clearButton.click();
   }
 
   async getLiveTypedText(): Promise<string> {
-    return (await this.liveTypedText.textContent())?.trim() ?? '';
+    const liveTypedText = await this.getLocator(
+      'liveTypedText',
+      '[data-testid="input-name-live-output"]',
+    );
+    return (await liveTypedText.textContent())?.trim() ?? '';
   }
 
   async getValidationMessage(): Promise<string> {
-    return (await this.validationMessage.textContent())?.trim() ?? '';
+    const validationMessage = await this.getLocator(
+      'validationMessage',
+      '[data-testid="input-validation-message"]',
+    );
+    return (await validationMessage.textContent())?.trim() ?? '';
   }
 }

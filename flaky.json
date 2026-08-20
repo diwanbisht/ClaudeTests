@@ -1,0 +1,18 @@
+[
+  {
+    "locatorName": "nameCell-NaN",
+    "pomFile": "src/pages/WebTablePage.ts",
+    "oldSelector": "#table-row-NaN-name",
+    "healed": false,
+    "pageUrl": "http://localhost:5500/",
+    "timestamp": "2026-08-19T10:47:08.939Z"
+  },
+  {
+    "locatorName": "usernameInput",
+    "pomFile": "src/pages/LoginPage.ts",
+    "oldSelector": "#usernameTest",
+    "healed": false,
+    "pageUrl": "https://the-internet.herokuapp.com/login",
+    "timestamp": "2026-08-20T07:55:42.077Z"
+  }
+]
