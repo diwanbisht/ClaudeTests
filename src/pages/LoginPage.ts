@@ -30,13 +30,13 @@ export class LoginPage extends BasePage {
     return (await flashMessage.textContent())?.trim() ?? '';
   }
   
-  async enterUsername(username: string, email: string): Promise<void> {
+  async enterUsername(username: string, email: string, message: string = 'Testing'): Promise<void> {
   await this.page.getByTestId('input-name').click();
   await this.page.getByTestId('input-name').fill(username);
   await this.page.getByTestId('input-name').press('Tab');
   await this.page.getByTestId('input-email').fill(email);
   await this.page.getByTestId('input-email').press('Tab');
-  await this.page.getByTestId('textarea-message').fill('Testing');
+  await this.page.getByTestId('textarea-message').fill(message);
   await this.page.getByTestId('btn-validate-inputs').click();
   await this.page.getByTestId('input-validation-message').click();
   await expect(this.page.getByTestId('input-validation-message')).toBeVisible();
