@@ -29,7 +29,7 @@
     "types": ["node", "@playwright/test"],
 
     // ✅ NEW FIX
-    "ignoreDeprecations": "6.0"
+    "ignoreDeprecations": "5.0"
   },
   "include": ["src", "playwright.config.ts"],
   "exclude": ["node_modules", "dist", "allure-report", "allure-results", "test-results"]

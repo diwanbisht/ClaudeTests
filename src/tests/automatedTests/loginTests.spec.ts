@@ -20,7 +20,9 @@ test.describe('User Information Test without self healling', () => {
   });
 
   excelLoginRows.forEach((row, index) => {
-    test(`Login with excel Test Data - row ${index + 1} (${row.name})`, async ({ page }) => {
+    test(`@regression Login with excel Test Data - row ${index + 1} (${row.name})`, async ({
+      page,
+    }) => {
       const loginPage = new LoginPage(page);
       await page.goto(config.uiWebAppUrl);
       await loginPage.enterUsername(row.name, row.email, row.message);

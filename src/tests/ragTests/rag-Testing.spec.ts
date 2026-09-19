@@ -4,7 +4,7 @@ import { chunkText } from '../../utils/chunker';
 import { createVectorDB } from '../../rag/setup';
 import { queryRAG } from '../../rag/query';
 import { askOllama } from '../../rag/ollamaClient';
-import { allure } from 'allure-playwright';
+import { attachment } from 'allure-js-commons';
 
 const pdfPath = 'src/test-data/hr-policy/HR_Leave_and_Policies_Manual.pdf';
 
@@ -22,22 +22,30 @@ test('Validate HR Leave Policy via Prompt (RAG + Claude)', async () => {
 
   // 🧠 Step 3: Create Vector DB
   const db = await createVectorDB(chunks);
+  const stored = await db.get({
+    limit: 1000, // or a large number
+    include: ["documents", "metadatas", "embeddings"],
+});
 
-  // ❓ Step 4: Prompt
-  const question = "What is the notice period?";
+console.log("Number of chunks:", stored.documents.length);
+await attachment("Stored Chunks", JSON.stringify(stored, null, 2), "application/json");
 
-  // 🔍 Step 5: Get relevant context
-  const context = await queryRAG(db, question);
+// ❓ Step 4: Prompt
+const question = "What is the notice period?";
 
-  // 🤖 Step 6: Ask local Ollama model
-  const systemPrompt = `Answer the question using only the following context:\n\n${context}`;
-  const answer = await askOllama(systemPrompt, question);
+// 🔍 Step 5: Get relevant context
+const context = await queryRAG(db, question);
 
-  console.log("AI Answer:", answer);
 
-  // ✅ Step 7: Assertion
-  expect(answer.toLowerCase()).toContain("60 days");
-  allure.attachment("AI Answer", answer, "text/plain");
+// 🤖 Step 6: Ask local Ollama model
+const systemPrompt = `Answer the question using only the following context:\n\n${context}`;
+const answer = await askOllama(systemPrompt, question);
+
+console.log("AI Answer:", answer);
+
+// ✅ Step 7: Assertion
+expect(answer.toLowerCase()).toContain("60 days");
+await attachment("AI Answer", answer, "text/plain");
 
 });
 
@@ -48,22 +56,28 @@ test('Validate Casual Leave Policy', async () => {
   const chunks = chunkText(text);
   const db = await createVectorDB(chunks);
 
+  console.log("Number of chunks:", chunks.length);
+
   const question = "How many casual leaves are given per year?";
   const context = await queryRAG(db, question);
 
   const prompt = `Answer only from context:\n${context}`;
   const answer = await askOllama(prompt, question);
 
+  console.log("AI Answer:", answer);
+
   expect(answer.toLowerCase()).toContain("12 days");
-   allure.attachment("AI Answer", answer, "text/plain");
+  await attachment("AI Answer", answer, "text/plain");
 });
 
 test('Validate Referral Bonus Policy', async () => {
-    test.setTimeout(180000);
+  test.setTimeout(180000);
 
   const text = await extractPDFText(pdfPath);
   const chunks = chunkText(text);
   const db = await createVectorDB(chunks);
+
+  console.log("Number of chunks:", chunks.length);
 
   const question = "What is referral bonus policy?";
   const context = await queryRAG(db, question);
@@ -71,8 +85,10 @@ test('Validate Referral Bonus Policy', async () => {
   const prompt = `Answer only from context:\n${context}`;
   const answer = await askOllama(prompt, question);
 
+  console.log("AI Answer:", answer);
+
   expect(answer.toLowerCase()).toContain("bonus");
-   allure.attachment("AI Answer", answer, "text/plain");
+  await attachment("AI Answer", answer, "text/plain");
 });
 
 test('Validate Joining Bonus Policy', async () => {
@@ -82,12 +98,16 @@ test('Validate Joining Bonus Policy', async () => {
   const chunks = chunkText(text);
   const db = await createVectorDB(chunks);
 
+  console.log("Number of chunks:", chunks.length);
+
   const question = "When is joining bonus paid?";
   const context = await queryRAG(db, question);
 
   const prompt = `Answer only from context:\n${context}`;
   const answer = await askOllama(prompt, question);
 
+  console.log("AI Answer:", answer);
+
   expect(answer.toLowerCase()).toContain("6 months");
-  allure.attachment("AI Answer", answer, "text/plain");
+  await attachment("AI Answer", answer, "text/plain");
 });
