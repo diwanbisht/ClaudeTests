@@ -96,3 +96,12 @@ jobs:
           name: allure-report
           path: allure-report/
           retention-days: 14
+
+      - run: npm ci
+
+      - name: Notify Slack/Teams (no-op if no webhook secret configured)
+        if: always()
+        run: npm run notify
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}

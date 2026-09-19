@@ -22,9 +22,15 @@ npx playwright test -g "valid credentials"       # run tests matching a title
 npm run test:headed                # run with a visible browser
 npm run test:debug                 # run with Playwright Inspector
 npm run test:shard                 # example: --shard=1/4 (used by CI/Docker)
+npm run test:smoke                 # tests tagged @smoke — fast critical-path check
+npm run test:sanity                # tests tagged @sanity — narrow post-deploy check
+npm run test:regression            # tests tagged @regression — full behavioral coverage
+npm run test:api                   # tests tagged @api — src/tests/apiTests/*
 
 npm run generate:tests -- PROJ-123 [XRAY_PROJECT_KEY]   # Jira -> Xray -> Playwright spec pipeline
 npm run report:allure              # generate + open the Allure HTML report from allure-results/
+npm run report:insights            # AI-generated pass/fail insights + recommendations from the last Allure run
+npm run notify                     # post the last run's summary to Slack/Teams (no-op if no webhook configured)
 npm run db:seed                    # create/populate the test_users table
 npm run db:cleanup                 # truncate test data tables
 
@@ -54,6 +60,26 @@ docker compose -f docker/docker-compose.yml up --abort-on-container-exit   # 4-w
   reserved for AI-generated specs (see pipeline below) — don't hand-edit
   files there without re-running lint, since the generation hook expects to
   own that formatting pass.
+- `src/tests/apiTests/` — API-only specs (`APIRequestContext` via the
+  `request` fixture), separate from UI specs so `npm run test:api` can
+  target them alone.
+
+### Test tagging convention
+
+Every test title is prefixed with one or more tags so `-g "@tag"` (or the
+`test:smoke`/`test:sanity`/`test:regression`/`test:api` npm scripts) can
+select a subset without touching `playwright.config.ts` projects:
+
+- `@smoke` — one fast, critical-path check per page/feature.
+- `@sanity` — the narrowest possible "is it even up" subset (a strict subset
+  of `@smoke`).
+- `@regression` — full behavioral coverage: edge cases, negative paths,
+  persistence checks.
+- `@api` — specs under `src/tests/apiTests/` that hit `UI-Web-App`'s REST
+  endpoints directly instead of driving the browser.
+
+A test can (and often should) carry more than one tag, e.g.
+`@smoke @regression`.
 
 ### Jira → Xray → Claude → Playwright pipeline
 
@@ -67,7 +93,11 @@ orchestrates the full chain:
    `.env` or it's left blank.
 2. `src/integrations/claude/generateManualTestCases.ts` asks Claude
    (`claudeClient.ts`, via `@anthropic-ai/sdk`) to turn the requirement into
-   structured manual test cases (JSON: summary + steps).
+   structured manual test cases (JSON: summary + steps). Before generating,
+   it retrieves the most similar existing manual test cases from the
+   framework's own RAG knowledge base (see below) and includes them as
+   grounding context, so Claude reuses existing scenario shape/terminology
+   instead of generating blind.
 3. `src/integrations/jira/xrayClient.ts` authenticates against Xray Cloud
    and creates each test case as an Xray "Manual" Test issue
    (`createXrayManualTest`), then links it back to the source requirement
@@ -82,6 +112,20 @@ The same pipeline is exposed inside Claude Code as the
 `generate-tests-from-jira` skill (`.claude/skills/generate-tests-from-jira/`),
 which additionally reviews/runs the generated spec and hands unresolved
 `TODO`s to the `pom-builder` subagent.
+
+### Framework-internal RAG (test-generation grounding)
+
+`src/rag/frameworkKnowledgeBase.ts` builds a persistent Chroma collection
+(`framework-knowledge-base`) from every manual-test-case markdown file under
+`src/tests/manualTests/`, embedding chunks via the same local Ollama model
+used by `src/rag/*`. `retrieveSimilarTestCases(queryText)` is called from
+`generateManualTestCases.ts` to fetch the top-k most similar existing test
+cases for a new requirement before asking Claude to generate new ones. This
+is distinct from `src/tests/ragTests/` (which tests a RAG pipeline as an
+*application under test*) — this module uses RAG *as* framework
+infrastructure. Both `isRagStackAvailable()` checks are soft: if Ollama or
+Chroma aren't running locally, retrieval returns no context and generation
+proceeds exactly as it did before this existed — never a hard failure.
 
 ### MySQL test data
 
@@ -102,6 +146,17 @@ suite needs seeded data; call them explicitly in CI/Docker before the run.
 - `src/utils/logger.ts` is a winston logger (console + `logs/test-run.log`)
   with a `step(name, fn)` helper for timed, named step logging inside
   page-object methods or specs.
+- `src/reporting/parseAllureResults.ts` reads `allure-results/*-result.json`
+  into typed pass/fail/broken/skipped counts — shared by both tools below.
+- `npm run report:insights` (`src/reporting/generateInsights.ts`) turns the
+  last run's Allure results into `test-results/ai-insights.md`: a stats
+  table plus a Claude-written executive summary, root-cause theme grouping,
+  and concrete recommendations. Falls back to a stats-only report (no error)
+  if `ANTHROPIC_API_KEY` isn't set.
+- `npm run notify` (`src/notifications/notifyWebhook.ts`) posts the same
+  run summary to Slack and/or MS Teams via `SLACK_WEBHOOK_URL`/
+  `TEAMS_WEBHOOK_URL` incoming webhooks. No-op (not an error) if neither is
+  configured; wired as an `if: always()` step in the CI `report` job.
 
 ### Docker / CI sharding
 

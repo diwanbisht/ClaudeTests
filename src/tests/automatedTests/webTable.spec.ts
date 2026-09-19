@@ -5,12 +5,14 @@ test.describe('Web Table', () => {
     await webTablePage.open();
   });
 
-  test('TC_WT_01 - loads existing users on page load', async ({ webTablePage }) => {
+  test('@smoke @sanity @regression TC_WT_01 - loads existing users on page load', async ({
+    webTablePage,
+  }) => {
     expect(await webTablePage.getRowCount()).toBeGreaterThan(0);
     expect(await webTablePage.isErrorVisible()).toBe(false);
   });
 
-  test('TC_WT_02 - add a new user via Add Row', async ({ webTablePage }) => {
+  test('@smoke @regression TC_WT_02 - add a new user via Add Row', async ({ webTablePage }) => {
     const newId = await webTablePage.addRow();
     const row = await webTablePage.getRow(newId);
 
@@ -19,7 +21,9 @@ test.describe('Web Table', () => {
     expect(row.role).toBe('Guest');
   });
 
-  test("TC_WT_03 - edit an existing user's Name and Email", async ({ webTablePage }) => {
+  test("@regression TC_WT_03 - edit an existing user's Name and Email", async ({
+    webTablePage,
+  }) => {
     const id = await webTablePage.addRow();
     const original = await webTablePage.getRow(id);
     const updatedEmail = `updated.${Date.now()}@example.com`;
@@ -32,7 +36,9 @@ test.describe('Web Table', () => {
     expect(updated.role).toBe(original.role);
   });
 
-  test('TC_WT_04 - edited user data persists after page reload', async ({ webTablePage }) => {
+  test('@regression TC_WT_04 - edited user data persists after page reload', async ({
+    webTablePage,
+  }) => {
     const id = await webTablePage.addRow();
     const updatedEmail = `updated.${Date.now()}@example.com`;
 
@@ -44,7 +50,9 @@ test.describe('Web Table', () => {
     expect(row.email).toBe(updatedEmail);
   });
 
-  test('TC_WT_05 - newly added user persists and is independently editable', async ({ webTablePage }) => {
+  test('@regression TC_WT_05 - newly added user persists and is independently editable', async ({
+    webTablePage,
+  }) => {
     const newId = await webTablePage.addRow();
     await webTablePage.reload();
 
